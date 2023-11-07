@@ -62,9 +62,7 @@ pipeline {
             steps {
                 sh 'nohup "${env.BUILD_ID}/sources/dist/add2vals" &'
                 sleep(time: 60, unit: 'SECONDS')
-                timeout(time: 1, unit: 'MINUTES') {
-                    error 'Pipeline failed due to timeout'
-                }
+                sh 'kill $(pgrep -f "add2vals")'
             }
         }
     }
