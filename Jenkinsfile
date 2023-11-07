@@ -38,7 +38,7 @@ pipeline {
                 input message: 'Lanjutkan ke tahap Deploy?', ok: 'Lanjutkan'
             }
         }
-        stage('Deliver') {
+        stage('Deploy') {
             agent any
             environment {
                 VOLUME = '$(pwd)/sources:/src'
@@ -54,6 +54,16 @@ pipeline {
                 success {
                     archiveArtifacts "${env.BUILD_ID}/sources/dist/add2vals"
                     sh "docker run --rm -v ${VOLUME} ${IMAGE} 'rm -rf build dist'"
+                }
+            }
+        }
+        stage('Run Application') {
+            agent any
+            steps {
+                sh 'nohup "${env.BUILD_ID}/sources/dist/add2vals" &'
+                sleep(time: 60, unit: 'SECONDS')
+                timeout(time: 1, unit: 'MINUTES') {
+                    error 'Pipeline failed due to timeout'
                 }
             }
         }
