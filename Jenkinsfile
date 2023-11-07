@@ -38,20 +38,20 @@ pipeline {
                         id: 'userInput',
                         message: 'Lanjutkan ke tahap Deploy?',
                         parameters: [
-                            pilihan(
+                            choice(
                                 choices: ['Proceed', 'Abort'],
                                 description: 'Pilih Proceed untuk melanjutkan atau Abort apabila Anda ingin menghentikan eksekusi.',
-                                name: 'Pilihan'
+                                name: 'Choice'
                             )
                         ]
                     )
-                    if (userInput.Pilihan == 'Abort') {
-                        error('Eksekusi dihentikan oleh pengguna.')
+                    if (userInput.Choice == 'Abort') {
+                        error('Eksekusi telah pengguna.')
                     }
                 }
             }
         }
-        stage('Deliver') {
+        stage('Deploy') {
             agent any
             environment {
                 VOLUME = '$(pwd)/sources:/src'
