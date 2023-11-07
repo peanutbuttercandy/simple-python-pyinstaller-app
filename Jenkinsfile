@@ -33,22 +33,9 @@ pipeline {
         stage('Manual Approval') {
             agent any
             steps {
-                script {
-                    def userInput = input(
-                        id: 'userInput',
-                        message: 'Lanjutkan ke tahap Deploy?',
-                        parameters: [
-                            booleanParam(
-                                defaultValue: true,
-                                description: 'Klik Proceed untuk melanjutkan, atau Abort apabila Anda ingin menghentikan eksekusi.',
-                                name: 'Lanjutkan'
-                            )
-                        ]
-                    )
-                    if (!userInput.Lanjutkan) {
-                        error('Eksekusi telah dihentikan.')
-                    }
-                }
+                checkout scm         
+            // Menunggu input persetujuan dari pengguna         
+                input message: 'Lanjutkan ke tahap Deploy?', ok: 'Lanjutkan'
             }
         }
         stage('Deliver') {
