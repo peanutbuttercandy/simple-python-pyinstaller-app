@@ -62,9 +62,6 @@ pipeline {
             steps {
                 sh 'nohup "${env.BUILD_ID}/sources/dist/add2vals" &'
                 sleep(time: 60, unit: 'SECONDS')
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        sh 'kill $(ps aux | grep "add2vals" | awk \'{print $2}\')'
-                }
             }
         }
     }
