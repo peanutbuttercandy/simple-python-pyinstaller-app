@@ -63,7 +63,7 @@ pipeline {
                 sh 'nohup "${env.BUILD_ID}/sources/dist/add2vals" &'
                 sleep(time: 60, unit: 'SECONDS')
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        sh 'pkill -f "add2vals"'
+                        sh 'killall -q -r "add2vals"'
                 }
             }
         }
