@@ -30,33 +30,45 @@ pipeline {
                 }
             }
         }
-        stage('Deliver') { 
+        stage('Manual Approval') {
             agent any
-            environment { 
+            steps {
+                script {
+                    def userInput = input(
+                        id: 'userInput',
+                        message: 'Lanjutkan ke tahap Deploy?',
+                        parameters: [
+                            booleanParam(
+                                defaultValue: true,
+                                description: 'Klik Proceed untuk melanjutkan, atau Abort apabila Anda ingin menghentikan eksekusi.',
+                                name: 'Lanjutkan'
+                            )
+                        ]
+                    )
+                    if (!userInput.Lanjutkan) {
+                        error('Eksekusi telah dihentikan')
+                    }
+                }
+            }
+        }
+        stage('Deploy') {
+            agent any
+            environment {
                 VOLUME = '$(pwd)/sources:/src'
                 IMAGE = 'cdrx/pyinstaller-linux:python2'
             }
             steps {
-                dir(path: env.BUILD_ID) { 
-                    unstash(name: 'compiled-results') 
-                    sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F add2vals.py'" 
+                dir(path: env.BUILD_ID) {
+                    unstash(name: 'compiled-results')
+                    sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F add2vals.py'"
                 }
             }
             post {
                 success {
-                    archiveArtifacts "${env.BUILD_ID}/sources/dist/add2vals" 
+                    archiveArtifacts "${env.BUILD_ID}/sources/dist/add2vals"
                     sh "docker run --rm -v ${VOLUME} ${IMAGE} 'rm -rf build dist'"
                 }
             }
-        }
-        stage('Manual Approval'){
-            checkout scm
-            input message: 'Lanjutkan ke tahap Deploy?', ok: 'Lanjutkan'     
-        }
-        stage('Deploy'){
-            checkout scm
-            sh 'pyinstaller --onefile sources/add2vals.py'
-            archiveArtifacts 'dist/add2vals'
         }
     }
 }
